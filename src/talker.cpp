@@ -52,7 +52,7 @@ int main()
 		ROS_INFO("%d %d", msg.x,msg.y);
     	chatter_pub.publish(msg);
 
-    	ros::ServiceClient client = n.serviceClient<tasks::danger_region.srv>("add_two_ints");
+    	ros::ServiceClient client = n.serviceClient<tasks::danger_region.srv>("danger_region");
   		tasks::danger_region srv;
 
   		if ((abs(corners[22].x-500) < 100)&&(abs(corners[22].y-500) < 100))
@@ -72,7 +72,7 @@ int main()
  		}
   		else
   		{
-    		ROS_ERROR("Failed to call service add_two_ints");
+    		ROS_ERROR("Failed to call service danger_region");
     		return 1;
   		}
 
