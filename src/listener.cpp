@@ -20,11 +20,11 @@ bool danger(tasks::danger_region::Request  &req,
 		ss << "outside!!";
 	res.out = ss.str();
 	ROS_INFO("request: input=%d", (int)req.inp);
-	ROS_INFO("sending back response: %s", res.out);
+	ROS_INFO("sending back response: %s", res.out.c_str());
 	return true;
 }
 
-int main(int argc,char **argv,)
+int main(int argc,char **argv)
 {
 	ros::init(argc, argv, "listener");
 

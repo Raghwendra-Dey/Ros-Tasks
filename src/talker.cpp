@@ -1,26 +1,17 @@
 #include "ros/ros.h"
-#include <cv_bridge/cv_bridge.h>
 #include "tasks/board_pose.h"
 #include "tasks/danger_region.h"
-#include "opencv2/core/core_c.h"
-#include "opencv2/core/core.hpp"
-#include "opencv2/flann/miniflann.hpp"
-#include "opencv2/imgproc/imgproc_c.h"
-#include "opencv2/imgproc.hpp"
-#include "opencv2/video/video.hpp"
-#include "opencv2/features2d/features2d.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/calib3d/calib3d.hpp"
-#include "opencv2/ml/ml.hpp"
-#include "opencv2/highgui/highgui_c.h"
+#include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/core/core.hpp"
 #include <bits/stdc++.h>
 
 using namespace std;
 using namespace cv;
 
-int main()
-{
+int main(int argc, char** argv)
+{	
 	ros::init(argc, argv, "talker");
 	ros::NodeHandle n;
 	ros::Publisher chatter_pub = n.advertise<tasks::board_pose>("check_pose", 1000);
@@ -28,7 +19,7 @@ int main()
 	tasks::board_pose msg;
 
 	namedWindow("video",0);
-	VideoCapture Video("new.avi");
+	VideoCapture Video("/home/raghwendra/Desktop/ARK-Tasks/Ros_tasks/new.avi");
 	Mat frame,gray;
 	
 	while(ros::ok())
@@ -46,38 +37,40 @@ int main()
 			break;
 		drawChessboardCorners(frame, board_size, Mat(corners), patternfound);
 		imshow("video",frame);
+		waitKey(10);
 
 		msg.x = (corners[22].x + corners[17].x)/2;
 		msg.y = (corners[22].y + corners[17].y)/2;
 		ROS_INFO("%d %d", msg.x,msg.y);
-    	chatter_pub.publish(msg);
+		chatter_pub.publish(msg);
 
-    	ros::ServiceClient client = n.serviceClient<tasks::danger_region.srv>("danger_region");
-  		tasks::danger_region srv;
+		ros::ServiceClient client = n.serviceClient<tasks::danger_region>("danger_region");
+		tasks::danger_region srv;
 
-  		if ((abs(corners[22].x-500) < 100)&&(abs(corners[22].y-500) < 100))
+		if ((abs(msg.x-500) <= 200)&&(abs(msg.y-500) <= 200))
 		{
 			srv.request.inp = true;
-		  	ROS_INFO("sent request: input=%d", (int)request.inp);
+			ROS_INFO("sent request: input=%ld", (int)srv.request.inp);
 		}
-  		else
+		else
 		{
 			srv.request.inp = false;
-		  	ROS_INFO("sent request: input=%d", (int)request.inp);
+			ROS_INFO("sent request: input=%ld", (int)srv.request.inp);
 		}
 
-  		if (client.call(srv))
-  		{
-    		ROS_INFO("Output: %s", srv.response.out);
- 		}
-  		else
-  		{
-    		ROS_ERROR("Failed to call service danger_region");
-    		return 1;
-  		}
+		if (client.call(srv))
+		{
+			ROS_INFO("Output: %s", srv.response.out.c_str());
+		}
+		else
+		{
+			ROS_ERROR("Failed to call service danger_region");
+			return 1;
+		}
 
-    		ros::spinOnce();
+			ros::spinOnce();
 
-    	loop_rate.sleep();
+		loop_rate.sleep();
 	}
 }
+
